@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>MOODA — Lighting Research Collective</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@800&family=Libre+Baskerville:ital,wght@1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f4f0e8;
+  --ink:   #14120e;
+  --ink2:  rgba(20,18,14,.38);
+  --ink3:  rgba(20,18,14,.13);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Force light mode — no dark mode inversion ever */
+html {
+  color-scheme: light only;
+  background: #f4f0e8 !important;
+}
+body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #f4f0e8 !important;
+  color: #14120e !important;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── CURSOR (desktop only) ── */
+@media (hover: hover) {
+  body { cursor: none; }
+  #cur {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #14120e;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s;
+  }
+  #cur.big {
+    width: 22px; height: 22px;
+    background: rgba(20,18,14,.05);
+    border: 1px solid rgba(20,18,14,.15);
+  }
+}
+@media (hover: none) { #cur { display: none; } }
+
+/* ── GRAIN ── */
+#grain {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .022;
+}
+
+/* ── CONTOUR CANVAS ── */
+#bgc {
+  position: fixed; inset: 0; z-index: 0;
+  opacity: 0; transition: opacity .9s ease;
+}
+#bgc.show { opacity: 1; }
+
+/* ── HORIZON LINES ── */
+.hr {
+  position: fixed; z-index: 3; pointer-events: none;
+  border-top: 1px solid rgba(20,18,14,.13);
+  transition: border-color .7s;
+  left: 48px; right: 48px;
+}
+.hr-t { top: 72px; }
+.hr-b { bottom: 72px; }
+body.cm .hr { border-color: rgba(20,18,14,.04); }
+
+@media (max-width: 600px) {
+  .hr { left: 24px; right: 24px; }
+  .hr-t { top: 56px; }
+  .hr-b { bottom: 56px; }
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between;
+  padding: 26px 48px; pointer-events: none;
+}
+.ntag {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: rgba(20,18,14,.38); transition: opacity .7s;
+}
+body.cm .ntag { opacity: .2; }
+
+@media (max-width: 600px) {
+  nav { padding: 18px 24px; flex-direction: column; gap: 4px; }
+  .ntag { font-size: 6px; letter-spacing: 3px; }
+  .ntag:last-child { display: none; }
+}
+
+/* ── STAGE ── */
+.stage {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 0 24px;
+}
+
+/* ── LOGO ── */
+.logo {
+  display: flex; align-items: center;
+  user-select: none; line-height: 1;
+  opacity: 0; animation: fu .9s ease forwards .2s;
+}
+
+/* Letter M and DA */
+.l {
+  font-family: 'Outfit', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  font-size: clamp(44px, 14vw, 108px);
+  font-weight: 800; color: #14120e;
+  line-height: 1; letter-spacing: -2px;
+  transition: color .7s;
+  display: inline-block;
+}
+body.cm #logoSvg { opacity: .45; }
+
+/* Circle container — sits between M and DA */
+.circles {
+  display: inline-flex; align-items: center;
+  gap: clamp(1px, .2vw, 3px);
+  position: relative;
+  /* Optical vertical alignment with capital letter */
+  top: clamp(1px, .3vw, 3px);
+}
+
+/* Each circle wrapper */
+.cw {
+  position: relative; display: block;
+  transition: transform .35s cubic-bezier(.34,1.4,.64,1);
+  -webkit-tap-highlight-color: transparent;
+  /* Size matches roughly the cap-height of the font */
+  width: clamp(44px, 13vw, 100px);
+  height: clamp(44px, 13vw, 100px);
+}
+
+@media (hover: hover) {
+  .cw { cursor: none; }
+  .cw:hover { transform: scale(1.07); }
+}
+@media (hover: none) {
+  .cw { cursor: pointer; }
+  .cw:active { transform: scale(0.93); }
+}
+
+/* SVG fills the wrapper exactly */
+.cw svg {
+  display: block;
+  width: 100%; height: 100%;
+}
+
+/* Gradient canvas — sits on top of left circle SVG */
+#gc {
+  position: absolute; inset: 0; z-index: 2;
+  border-radius: 50%; pointer-events: none;
+  opacity: 0; transition: opacity .5s;
+  width: 100%; height: 100%;
+}
+#cAbout.active #gc,
+#cAbout:hover  #gc { opacity: 1; }
+
+/* Tooltip — desktop only */
+.tip {
+  position: absolute; bottom: -28px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(20,18,14,.38); white-space: nowrap;
+  opacity: 0; transition: opacity .22s; pointer-events: none;
+}
+@media (hover: hover) { .cw:hover .tip { opacity: 1; } }
+
+/* Mobile labels below circles */
+.mob-labels {
+  display: none; gap: 0; margin-top: 14px;
+}
+@media (hover: none) {
+  .mob-labels { display: flex; width: 100%; justify-content: center; }
+}
+.mob-lbl {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(20,18,14,.2); flex: 1; text-align: center;
+  transition: color .3s;
+}
+.mob-lbl.active { color: rgba(20,18,14,.45); }
+
+/* ── TAGLINE ── */
+.tg {
+  font-family: 'Outfit', sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: clamp(9px, 1.8vw, 12px);
+  color: rgba(20,18,14,.28);
+  margin-top: clamp(20px, 4vw, 36px);
+  text-align: center; line-height: 2.4;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  max-width: 560px; padding: 0 8px;
+  opacity: 0; animation: fu .8s ease forwards .55s;
+  transition: opacity .7s;
+}
+body.cm .tg { opacity: .06; }
+
+/* Tap hint — mobile only */
+.tap-hint {
+  display: none; margin-top: 20px;
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(20,18,14,.2);
+  opacity: 0; animation: fu .7s ease forwards .9s;
+}
+@media (hover: none) { .tap-hint { display: block; } }
+
+/* ── META ── */
+.meta {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 28px 48px;
+  opacity: 0; animation: fu .7s ease forwards 1s;
+}
+.ml, .mr {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(20,18,14,.13); line-height: 2; transition: opacity .7s;
+}
+body.cm .ml, body.cm .mr { opacity: .2; }
+.mc {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 28px;
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(20,18,14,.13); display: flex; align-items: center; gap: 10px;
+  transition: opacity .7s;
+}
+body.cm .mc { opacity: .2; }
+.md { width: 3px; height: 3px; border-radius: 50%; background: rgba(20,18,14,.13); }
+
+@media (max-width: 600px) {
+  .meta { padding: 20px 24px; }
+  .ml, .mr { display: none; }
+  .mc { font-size: 6px; }
+}
+
+@keyframes fu {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="grain"></div>
+<canvas id="bgc"></canvas>
+<div class="hr hr-t"></div>
+<div class="hr hr-b"></div>
+
+<nav>
+  <span class="ntag">Lighting Research Collective</span>
+  <span class="ntag">Singapore · Wismar · Kraków</span>
+</nav>
+
+<div class="stage">
+  <div class="logo" style="position:relative;">
+
+    <!-- Full SVG logo from Illustrator — black version -->
+    <!-- Circles are overlaid with invisible hit areas for interactivity -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 314.41"
+         style="width:clamp(280px,70vw,700px);height:auto;display:block;transition:opacity .7s"
+         id="logoSvg">
+      <defs>
+        <style>
+          .ll-1 { fill: #666; font-family: Outfit-Medium, Outfit; font-size: 100px; font-variation-settings:'wght' 500; font-weight:500; }
+          .ll-2 { fill: #14120e; font-family: Outfit-Black, Outfit; font-size: 201.4px; font-variation-settings:'wght' 900; font-weight:800; }
+          .ll-3 { fill: #14120e; font-family: Outfit-Black, Outfit; font-size: 201.4px; font-variation-settings:'wght' 900; font-weight:800; letter-spacing:-.03em; }
+        </style>
+      </defs>
+      <!-- M -->
+      <text class="ll-2" transform="translate(0 226.19)"><tspan x="0" y="0">M</tspan></text>
+      <!-- DA -->
+      <text class="ll-2" transform="translate(526.57 226.19)"><tspan x="0" y="0">D</tspan></text>
+      <text class="ll-3" transform="translate(684.66 226.19)"><tspan x="0" y="0">A</tspan></text>
+      <!-- .lab -->
+      <text class="ll-1" transform="translate(850.18 226.19)"><tspan x="0" y="0">. lab</tspan></text>
+      <!-- Left circle — thick stroke, hollow centre (About) -->
+      <circle cx="271" cy="154.23" r="46.36" fill="none" stroke="#14120e" stroke-width="50"/>
+      <!-- Right circle — thin stroke + black dot (Journal) -->
+      <circle cx="443.65" cy="154.23" r="66" fill="none" stroke="#14120e" stroke-width="9"/>
+      <circle cx="443.65" cy="154.23" r="20.31" fill="#14120e"/>
+      <!-- Gradient canvas overlay for left circle (About hover) -->
+    </svg>
+
+    <!-- Invisible hit areas over circles — positioned absolutely -->
+    <!-- These carry the interactive canvas and touch events -->
+    <div id="cAbout" style="
+      position:absolute;
+      border-radius:50%;
+      -webkit-tap-highlight-color:transparent;
+      cursor:none;
+    ">
+      <canvas id="gc" width="200" height="200" style="
+        position:absolute;inset:0;
+        width:100%;height:100%;
+        border-radius:50%;
+        pointer-events:none;
+        opacity:0;transition:opacity .5s;
+      "></canvas>
+      <span class="tip" style="bottom:-28px">About us</span>
+    </div>
+
+    <div id="cJournal" style="
+      position:absolute;
+      border-radius:50%;
+      -webkit-tap-highlight-color:transparent;
+      cursor:none;
+    ">
+      <span class="tip" style="bottom:-28px">Lighting Journal</span>
+    </div>
+
+  </div>
+
+  <!-- Mobile labels -->
+  <div class="mob-labels">
+    <span class="mob-lbl" id="lblAbout">About us</span>
+    <span class="mob-lbl" id="lblJournal">Lighting Journal</span>
+  </div>
+
+  <p class="tg">
+    Lighting Research Collective<br>
+    We experience light, we study light, and play with light.
+  </p>
+
+  <p class="tap-hint">Tap a circle to explore</p>
+</div>
+
+<div class="meta" style="display:none"></div>
+
+<script>
+const isTouch = !window.matchMedia('(hover: hover)').matches;
+
+/* ── 定位圓圈 hit areas 對齊 SVG ── */
+function positionCircles() {
+  const svg = document.getElementById('logoSvg');
+  const rect = svg.getBoundingClientRect();
+  const vbW = 1100, vbH = 314.41;
+  const scaleX = rect.width  / vbW;
+  const scaleY = rect.height / vbH;
+  const logoWrap = svg.parentElement;
+  const wrapRect = logoWrap.getBoundingClientRect();
+
+  // Left circle: cx=271, visual r = 46.36 + stroke(50)/2 = 71.36
+  const lx = 271 * scaleX,    ly = 154.23 * scaleY, lr = 71.36 * scaleX;
+  // Right circle: cx=443.65, visual r = 66 + stroke(9)/2 = 70.5
+  const rx = 443.65 * scaleX, ry = 154.23 * scaleY, rr = 70.5 * scaleX;
+
+  // offset from logo wrapper top-left
+  const offsetX = rect.left - wrapRect.left;
+  const offsetY = rect.top  - wrapRect.top;
+
+  const cA = document.getElementById('cAbout');
+  const cJ = document.getElementById('cJournal');
+
+  function pos(el, x, y, r) {
+    el.style.left   = (offsetX + x - r) + 'px';
+    el.style.top    = (offsetY + y - r) + 'px';
+    el.style.width  = (r * 2) + 'px';
+    el.style.height = (r * 2) + 'px';
+  }
+  pos(cA, lx, ly, lr);
+  pos(cJ, rx, ry, rr);
+}
+
+window.addEventListener('load',   positionCircles);
+window.addEventListener('resize', positionCircles);
+setTimeout(positionCircles, 300);
+
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+if (cur && !isTouch) {
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+  ['cAbout','cJournal'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+}
+
+/* ════════════════════════════
+   LEFT CIRCLE — gradient spin
+   Purple → Pink → Blue conic
+════════════════════════════ */
+const gc   = document.getElementById('gc');
+const gCtx = gc.getContext('2d');
+const SZ = 200, CX = 100, CY = 100, CR = 98;
+let gAngle = 0, gRaf = null;
+
+function drawGrad() {
+  gCtx.clearRect(0, 0, SZ, SZ);
+  gCtx.save();
+  gCtx.beginPath();
+  gCtx.arc(CX, CY, CR, 0, Math.PI * 2);
+  gCtx.clip();
+  const cg = gCtx.createConicGradient(gAngle, CX, CY);
+  cg.addColorStop(0,    '#7040c8');
+  cg.addColorStop(0.18, '#b040b8');
+  cg.addColorStop(0.34, '#d83888');
+  cg.addColorStop(0.50, '#8848d0');
+  cg.addColorStop(0.66, '#4870e8');
+  cg.addColorStop(0.82, '#9040cc');
+  cg.addColorStop(1,    '#7040c8');
+  gCtx.fillStyle = cg;
+  gCtx.fillRect(0, 0, SZ, SZ);
+  // Knock out centre dot
+  gCtx.globalCompositeOperation = 'destination-out';
+  gCtx.beginPath();
+  gCtx.arc(CX, CY, 30, 0, Math.PI * 2);
+  gCtx.fill();
+  gCtx.restore();
+  // White dot on top
+  gCtx.beginPath();
+  gCtx.arc(CX, CY, 24, 0, Math.PI * 2);
+  gCtx.fillStyle = '#f4f0e8';
+  gCtx.fill();
+}
+
+function loopGrad() { gAngle += 0.009; drawGrad(); gRaf = requestAnimationFrame(loopGrad); }
+function startGrad() {
+  gc.style.opacity = '1';
+  if (!gRaf) loopGrad();
+}
+function stopGrad()  {
+  gc.style.opacity = '0';
+  cancelAnimationFrame(gRaf); gRaf = null;
+  setTimeout(() => gCtx.clearRect(0,0,SZ,SZ), 500);
+}
+
+const cAbout = document.getElementById('cAbout');
+
+if (isTouch) {
+  let tapped = false;
+  cAbout.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (!tapped) {
+      tapped = true;
+      cAbout.classList.add('active');
+      document.getElementById('lblAbout').classList.add('active');
+      startGrad();
+      setTimeout(() => {
+        if (tapped) {
+          tapped = false;
+          cAbout.classList.remove('active');
+          document.getElementById('lblAbout').classList.remove('active');
+          stopGrad();
+        }
+      }, 3000);
+    } else {
+      window.location.href = '/about';
+    }
+  }, { passive: false });
+} else {
+  cAbout.addEventListener('mouseenter', startGrad);
+  cAbout.addEventListener('mouseleave', stopGrad);
+  cAbout.addEventListener('click', () => window.location.href = '/about');
+}
+
+/* ════════════════════════════
+   RIGHT CIRCLE — contour bg
+   Topographic line animation
+════════════════════════════ */
+const bgc  = document.getElementById('bgc');
+const bCtx = bgc.getContext('2d');
+let bW, bH, bPhase = 0, bRaf = null;
+
+function resizeBg() {
+  bW = bgc.width  = window.innerWidth;
+  bH = bgc.height = window.innerHeight;
+}
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+function field(x, y, t) {
+  const nx = x / bW, ny = y / bH;
+  return (
+    Math.sin(nx * 6.2  + t * .45) * .28 +
+    Math.cos(ny * 7.8  - t * .38) * .28 +
+    Math.sin((nx+ny) * 5.5 + t * .55) * .20 +
+    Math.cos((nx-ny) * 4.8 - t * .32) * .14 +
+    Math.sin(nx * 3.1  + ny * 4.2 + t * .26) * .10
+  );
+}
+
+function drawBg() {
+  bCtx.fillStyle = '#f4f0e8';
+  bCtx.fillRect(0, 0, bW, bH);
+  const NLINES = 26, STEP = isTouch ? 7 : 5;
+  for (let li = 0; li < NLINES; li++) {
+    const thresh   = -0.95 + (li / (NLINES-1)) * 1.9;
+    const darkness = 1 - Math.abs(thresh) * 0.55;
+    const alpha    = 0.04 + darkness * 0.10;
+    bCtx.beginPath();
+    bCtx.strokeStyle = `rgba(20,18,14,${alpha.toFixed(3)})`;
+    bCtx.lineWidth = 0.8;
+    for (let x = 0; x < bW-STEP; x += STEP) {
+      for (let y = 0; y < bH-STEP; y += STEP) {
+        const v00=field(x,y,bPhase), v10=field(x+STEP,y,bPhase),
+              v01=field(x,y+STEP,bPhase), v11=field(x+STEP,y+STEP,bPhase);
+        const a=v00<thresh, b=v10<thresh, c=v01<thresh, d=v11<thresh;
+        const pts=[];
+        if(a!==b) pts.push([x+STEP*(thresh-v00)/(v10-v00), y]);
+        if(a!==c) pts.push([x, y+STEP*(thresh-v00)/(v01-v00)]);
+        if(b!==d) pts.push([x+STEP, y+STEP*(thresh-v10)/(v11-v10)]);
+        if(c!==d) pts.push([x+STEP*(thresh-v01)/(v11-v01), y+STEP]);
+        if(pts.length>=2){ bCtx.moveTo(pts[0][0],pts[0][1]); bCtx.lineTo(pts[1][0],pts[1][1]); }
+      }
+    }
+    bCtx.stroke();
+  }
+}
+
+function loopBg()  { bPhase += .010; drawBg(); bRaf = requestAnimationFrame(loopBg); }
+function startBg() {
+  document.body.classList.add('cm');
+  bgc.classList.add('show');
+  if (!bRaf) loopBg();
+}
+function stopBg() {
+  document.body.classList.remove('cm');
+  bgc.classList.remove('show');
+  cancelAnimationFrame(bRaf); bRaf = null;
+}
+
+const cJournal = document.getElementById('cJournal');
+
+if (isTouch) {
+  let tapped = false;
+  cJournal.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (!tapped) {
+      tapped = true;
+      document.getElementById('lblJournal').classList.add('active');
+      startBg();
+      setTimeout(() => {
+        if (tapped) {
+          tapped = false;
+          document.getElementById('lblJournal').classList.remove('active');
+          stopBg();
+        }
+      }, 3000);
+    } else {
+      window.location.href = '/journal';
+    }
+  }, { passive: false });
+} else {
+  cJournal.addEventListener('mouseenter', startBg);
+  cJournal.addEventListener('mouseleave', stopBg);
+  cJournal.addEventListener('click', () => window.location.href = '/journal');
+}
+</script>
+</body>
+</html>
