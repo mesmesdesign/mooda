@@ -1,0 +1,19 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images/uploads"
+
+collections:
+  - name: "posts"
+    label: "Articles"
+    folder: "posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Author", name: "author", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime" }
+      - { label: "Country", name: "country", widget: "string" }
+      - { label: "Cover Image", name: "cover", widget: "image", required: false }
+      - { label: "Body", name: "body", widget: "markdown" }
