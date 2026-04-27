@@ -260,23 +260,24 @@ async function loadPosts() {
   const container = document.getElementById('grid-container');
   try {
     const repo = document.getElementById('repo-config').dataset.repo;
+    const [owner, repoName] = repo.split('/');
 
-    // Add cache-busting and accept header to avoid GitHub API rate limits
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/posts`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json' },
-      cache: 'no-cache'
-    });
+    // Use GitHub API with a timestamp to bust cache
+    const ts = Date.now();
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repoName}/git/trees/main?recursive=1&_=${ts}`,
+      { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+    );
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(`GitHub API error ${res.status}: ${errData.message || 'unknown'}`);
-    }
+    if (!res.ok) throw new Error(`GitHub tree API error ${res.status}`);
 
-    const files = await res.json();
+    const data = await res.json();
 
-    // Accept any .md file regardless of filename format
-    const mdFiles = files.filter(f =>
-      f.name.endsWith('.md') && f.type === 'file'
+    // Find all .md files inside posts/ folder
+    const mdFiles = data.tree.filter(f =>
+      f.path.startsWith('posts/') &&
+      f.path.endsWith('.md') &&
+      f.type === 'blob'
     );
 
     if (mdFiles.length === 0) {
@@ -284,13 +285,16 @@ async function loadPosts() {
       return;
     }
 
+    // Fetch each file using raw.githubusercontent.com — no rate limit issues
     const posts = await Promise.all(mdFiles.map(async (file) => {
-      const r = await fetch(file.download_url, { cache: 'no-cache' });
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repoName}/main/${file.path}?_=${ts}`;
+      const r = await fetch(rawUrl);
       const text = await r.text();
-      return parsePost(text, file.name);
+      const filename = file.path.replace('posts/', '');
+      return parsePost(text, filename);
     }));
 
-    // Sort by date, put undated articles at the end
+    // Sort by date descending, undated at end
     posts.sort((a, b) => {
       if (!a.date && !b.date) return 0;
       if (!a.date) return 1;
@@ -310,9 +314,10 @@ async function loadPosts() {
         el.addEventListener('mouseleave', () => cur.classList.remove('big'));
       });
     }
+
   } catch (e) {
     console.error('loadPosts error:', e);
-    container.innerHTML = `<div class="state-msg">Could not load articles. Please try again later.</div>`;
+    container.innerHTML = '<div class="state-msg">Could not load articles. Please try again later.</div>';
   }
 }
 
