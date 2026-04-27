@@ -260,19 +260,43 @@ async function loadPosts() {
   const container = document.getElementById('grid-container');
   try {
     const repo = document.getElementById('repo-config').dataset.repo;
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/posts`);
-    if (!res.ok) throw new Error('No posts folder found');
+
+    // Add cache-busting and accept header to avoid GitHub API rate limits
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/posts`, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' },
+      cache: 'no-cache'
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(`GitHub API error ${res.status}: ${errData.message || 'unknown'}`);
+    }
+
     const files = await res.json();
-    const mdFiles = files.filter(f => f.name.endsWith('.md'));
-    if (mdFiles.length === 0) throw new Error('No articles yet');
+
+    // Accept any .md file regardless of filename format
+    const mdFiles = files.filter(f =>
+      f.name.endsWith('.md') && f.type === 'file'
+    );
+
+    if (mdFiles.length === 0) {
+      container.innerHTML = '<div class="state-msg">No articles published yet. Check back soon.</div>';
+      return;
+    }
 
     const posts = await Promise.all(mdFiles.map(async (file) => {
-      const r = await fetch(file.download_url);
+      const r = await fetch(file.download_url, { cache: 'no-cache' });
       const text = await r.text();
       return parsePost(text, file.name);
     }));
 
-    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort by date, put undated articles at the end
+    posts.sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return new Date(b.date) - new Date(a.date);
+    });
 
     const grid = document.createElement('div');
     grid.className = 'grid';
@@ -287,8 +311,8 @@ async function loadPosts() {
       });
     }
   } catch (e) {
-    console.error(e);
-    showPlaceholder(container);
+    console.error('loadPosts error:', e);
+    container.innerHTML = `<div class="state-msg">Could not load articles. Please try again later.</div>`;
   }
 }
 
@@ -318,9 +342,14 @@ function parsePost(text, filename) {
   const fmMatch = text.match(/^---\n([\s\S]*?)\n---/);
   let meta = {};
   if (fmMatch) { try { meta = jsyaml.load(fmMatch[1]); } catch {} }
-  const slug = filename.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
+  // Handle filenames with or without date prefix
+  const slug = filename
+    .replace(/^\d{4}-\d{2}-\d{2}-/, '')
+    .replace('.md', '')
+    .toLowerCase()
+    .replace(/\s+/g, '-');
   return {
-    title:   meta.title   || 'Untitled',
+    title:   meta.title   || filename.replace('.md', ''),
     author:  meta.author  || 'MOODA',
     date:    meta.date    || '',
     country: meta.country || '',
