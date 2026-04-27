@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>MOODA — Author Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;800&family=Libre+Baskerville:ital,wght@1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<style>
+:root {
+  --paper: #f4f0e8;
+  --ink:   #14120e;
+  --ink2:  rgba(20,18,14,.38);
+  --ink3:  rgba(20,18,14,.13);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light only; background: var(--paper) !important; }
+body {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  -webkit-text-size-adjust: 100%;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── CURSOR ── */
+@media (hover: hover) {
+  body { cursor: none; }
+  #cur {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s;
+  }
+  #cur.big { width: 22px; height: 22px; background: rgba(20,18,14,.05); border: 1px solid rgba(20,18,14,.15); }
+}
+@media (hover: none) { #cur { display: none; } }
+
+/* ── GRAIN ── */
+#grain {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .022;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink3);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 48px;
+}
+.nav-logo {
+  font-family: 'Outfit', sans-serif; font-weight: 800;
+  font-size: 14px; letter-spacing: -0.5px;
+  color: var(--ink); text-decoration: none; transition: opacity .3s;
+}
+.nav-logo:hover { opacity: .5; }
+.nav-links { display: flex; gap: 32px; }
+.ntag {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink2); text-decoration: none; transition: color .3s;
+}
+.ntag:hover { color: var(--ink); }
+@media (max-width: 600px) {
+  nav { padding: 18px 24px; }
+  .nav-links { gap: 20px; }
+  .ntag { font-size: 6px; letter-spacing: 3px; }
+}
+
+/* ── STAGE — centred login ── */
+.stage {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 120px 24px 80px;
+}
+
+/* ── LOGIN BOX ── */
+.login-box {
+  width: 100%; max-width: 400px;
+  opacity: 0; animation: fu .9s ease forwards .2s;
+}
+
+.login-label {
+  font-size: 7px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+.login-label::after { content: ''; flex: 1; height: 1px; background: var(--ink3); }
+
+.login-title {
+  font-family: 'Outfit', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 6vw, 42px);
+  line-height: 1; letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.login-subtitle {
+  font-size: 10px; letter-spacing: 1px; line-height: 2;
+  color: var(--ink2); margin-bottom: 48px;
+}
+
+/* ── FORM ── */
+.field {
+  margin-bottom: 20px;
+}
+.field label {
+  display: block;
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 8px;
+}
+.field input {
+  width: 100%;
+  background: transparent;
+  border: none; border-bottom: 1.5px solid rgba(20,18,14,.3);
+  padding: 12px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 15px; letter-spacing: 0.5px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .3s;
+  -webkit-appearance: none;
+}
+.field input:focus { border-color: var(--ink); }
+.field input::placeholder { color: rgba(20,18,14,.25); font-size: 13px; }
+
+/* ── PASSWORD WRAPPER ── */
+.pw-wrap {
+  position: relative; display: flex; align-items: center;
+}
+.pw-wrap input { flex: 1; padding-right: 32px; }
+.pw-toggle {
+  position: absolute; right: 0;
+  background: none; border: none;
+  cursor: none; padding: 4px;
+  color: var(--ink3); transition: color .3s;
+  display: flex; align-items: center;
+}
+.pw-toggle:hover { color: var(--ink); }
+@media (hover: none) { .pw-toggle { cursor: pointer; } }
+
+/* ── SUBMIT BUTTON ── */
+.btn {
+  width: 100%; margin-top: 32px;
+  background: var(--ink); color: var(--paper);
+  border: none; padding: 16px 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: 4px; text-transform: uppercase;
+  cursor: none; transition: opacity .3s;
+}
+@media (hover: none) { .btn { cursor: pointer; } }
+.btn:hover { opacity: .7; }
+.btn:disabled { opacity: .3; cursor: not-allowed; }
+
+/* ── ERROR / STATUS MESSAGE ── */
+.msg {
+  margin-top: 20px;
+  font-size: 9px; letter-spacing: 2px;
+  text-align: center; min-height: 20px;
+  transition: color .3s;
+}
+.msg.error { color: #c0392b; }
+.msg.success { color: var(--ink2); }
+
+/* ── ALREADY LOGGED IN STATE ── */
+.logged-in {
+  display: none;
+  text-align: center;
+}
+.logged-in-title {
+  font-family: 'Outfit', sans-serif; font-weight: 800;
+  font-size: 28px; letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+.logged-in-sub {
+  font-size: 10px; letter-spacing: 1px; line-height: 2;
+  color: var(--ink2); margin-bottom: 36px;
+}
+.btn-group { display: flex; flex-direction: column; gap: 12px; }
+.btn-outline {
+  width: 100%; padding: 14px 24px;
+  background: transparent;
+  border: 1px solid var(--ink3);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink2); cursor: none; transition: all .3s;
+  text-decoration: none; text-align: center; display: block;
+}
+.btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+@media (hover: none) { .btn-outline { cursor: pointer; } }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--ink3);
+  padding: 24px 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-copy {
+  font-size: 7px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink3);
+}
+.footer-back {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink3); text-decoration: none; transition: color .3s;
+}
+.footer-back:hover { color: var(--ink2); }
+
+@media (max-width: 600px) {
+  footer { padding: 20px 24px; }
+  .stage { padding: 100px 24px 60px; }
+}
+
+@keyframes fu {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="grain"></div>
+
+<nav>
+  <a href="/" class="nav-logo">MOODA</a>
+  <div class="nav-links">
+    <a href="/" class="ntag">Home</a>
+    <a href="/about" class="ntag">About</a>
+    <a href="/journal" class="ntag">Journal</a>
+  </div>
+</nav>
+
+<div class="stage">
+  <div class="login-box">
+
+    <!-- Login form — shown when logged out -->
+    <div id="form-state">
+      <div class="login-label">Author access</div>
+      <h1 class="login-title">Welcome<br>back.</h1>
+      <p class="login-subtitle">Sign in to write and publish<br>to the Lighting Journal.</p>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+          <button class="pw-toggle" id="pw-toggle" type="button" onclick="togglePassword()" aria-label="Show password">
+            <svg id="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn" id="login-btn" onclick="handleLogin()">Sign in →</button>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <!-- Logged in state -->
+    <div class="logged-in" id="logged-in-state">
+      <div class="login-label">Author access</div>
+      <div class="logged-in-title">You're in.</div>
+      <p class="logged-in-sub">Welcome back. Ready to write?</p>
+      <div class="btn-group">
+        <a href="/admin" class="btn" style="text-decoration:none; display:block; text-align:center;">Go to editor →</a>
+        <a href="#" class="btn-outline" id="logout-btn">Sign out</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span class="footer-copy">© 2026 Mooda Labs — All Rights Reserved</span>
+  <a href="/" class="footer-back">← Back to site</a>
+</footer>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+if (cur && window.matchMedia('(hover: hover)').matches) {
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+}
+
+/* ── NETLIFY IDENTITY ── */
+const netlifyIdentity = window.netlifyIdentity;
+
+netlifyIdentity.on('init', user => {
+  if (user) showLoggedIn(user);
+});
+
+netlifyIdentity.on('login', user => {
+  hideMsg();
+  showLoggedIn(user);
+  // Redirect to admin after short delay
+  setTimeout(() => { window.location.href = '/admin'; }, 800);
+});
+
+netlifyIdentity.on('logout', () => {
+  showLoggedOut();
+});
+
+function showLoggedIn(user) {
+  document.getElementById('form-state').style.display = 'none';
+  document.getElementById('logged-in-state').style.display = 'block';
+}
+
+function showLoggedOut() {
+  document.getElementById('form-state').style.display = 'block';
+  document.getElementById('logged-in-state').style.display = 'none';
+}
+
+function handleLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+
+  if (!email || !password) {
+    showMsg('Please enter your email and password.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  hideMsg();
+
+  netlifyIdentity.gotrue.login(email, password, true)
+    .then(user => {
+      netlifyIdentity.store.user = user;
+      netlifyIdentity.emit('login', user);
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = 'Sign in →';
+      showMsg('Incorrect email or password.', 'error');
+    });
+}
+
+document.getElementById('logout-btn').addEventListener('click', e => {
+  e.preventDefault();
+  netlifyIdentity.logout();
+});
+
+// Allow Enter key to submit
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+function togglePassword() {
+  const input = document.getElementById('password');
+  const icon = document.getElementById('eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = `
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+      <line x1="1" y1="1" x2="23" y2="23"/>
+    `;
+  } else {
+    input.type = 'password';
+    icon.innerHTML = `
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    `;
+  }
+}
+
+function showMsg(text, type) {
+  const msg = document.getElementById('msg');
+  msg.textContent = text;
+  msg.className = 'msg ' + type;
+}
+function hideMsg() {
+  const msg = document.getElementById('msg');
+  msg.textContent = '';
+  msg.className = 'msg';
+}
+</script>
+</body>
+</html>
