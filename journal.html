@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>MOODA — Lighting Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;800&family=Libre+Baskerville:ital,wght@1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<style>
+:root {
+  --paper: #f4f0e8;
+  --ink:   #14120e;
+  --ink2:  rgba(20,18,14,.38);
+  --ink3:  rgba(20,18,14,.13);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light only; background: var(--paper) !important; }
+body {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  -webkit-text-size-adjust: 100%;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── CURSOR ── */
+@media (hover: hover) {
+  body { cursor: none; }
+  #cur {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s;
+  }
+  #cur.big { width: 22px; height: 22px; background: rgba(20,18,14,.05); border: 1px solid rgba(20,18,14,.15); }
+}
+@media (hover: none) { #cur { display: none; } }
+
+/* ── GRAIN ── */
+#grain {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .022;
+}
+
+/* ── TOP NAV BAR — sticky, background filled ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink3);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 48px;
+}
+.nav-logo {
+  font-family: 'Outfit', sans-serif; font-weight: 800;
+  font-size: 14px; letter-spacing: -0.5px;
+  color: var(--ink); text-decoration: none;
+  transition: opacity .3s;
+}
+.nav-logo:hover { opacity: .5; }
+.nav-links { display: flex; gap: 32px; }
+.ntag {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink2); text-decoration: none; transition: color .3s;
+}
+.ntag:hover { color: var(--ink); }
+.ntag.active { color: var(--ink); }
+@media (max-width: 600px) {
+  nav { padding: 18px 24px; }
+  .ntag { font-size: 6px; letter-spacing: 3px; }
+  .nav-links { gap: 20px; }
+}
+
+/* ── MAIN ── */
+main {
+  flex: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 120px 48px 80px;
+}
+
+/* ── PAGE LABEL ── */
+.page-label {
+  font-size: 7px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 16px;
+  opacity: 0; animation: fu .7s ease forwards .1s;
+}
+.page-label::after { content: ''; flex: 1; height: 1px; background: var(--ink3); }
+
+.page-title {
+  font-family: 'Outfit', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  font-weight: 800;
+  font-size: clamp(32px, 6vw, 56px);
+  letter-spacing: -2px; line-height: 1;
+  margin-bottom: 80px;
+  opacity: 0; animation: fu .8s ease forwards .2s;
+}
+
+/* ── LOADING / EMPTY STATE ── */
+.state-msg {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink3); padding: 80px 0; text-align: center;
+}
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px 40px;
+}
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .grid { grid-template-columns: 1fr; gap: 40px; } }
+
+/* ── CARD ── */
+.card {
+  display: flex; flex-direction: column;
+  text-decoration: none; color: inherit;
+  opacity: 0; animation: fu .7s ease forwards;
+  cursor: none;
+}
+@media (hover: none) { .card { cursor: pointer; } }
+
+.card-img {
+  width: 100%; aspect-ratio: 4/3;
+  background: var(--ink3);
+  overflow: hidden; margin-bottom: 20px;
+}
+.card-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform .6s cubic-bezier(.25,.46,.45,.94);
+  filter: grayscale(20%);
+}
+.card:hover .card-img img { transform: scale(1.04); }
+.card-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+.card-img-placeholder svg { opacity: .3; }
+.card-meta {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 10px;
+}
+.card-date, .card-country {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink3);
+}
+.card-title {
+  font-family: 'Libre Baskerville', serif; font-style: italic;
+  font-size: clamp(15px, 2vw, 19px);
+  line-height: 1.35; margin-bottom: 10px;
+  transition: opacity .3s;
+}
+.card:hover .card-title { opacity: .6; }
+.card-author {
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink2); margin-top: auto; padding-top: 12px;
+  border-top: 1px solid var(--ink3);
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--ink3);
+  padding: 40px 48px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 32px;
+  opacity: 0; animation: fu .7s ease forwards .8s;
+}
+.footer-nav { display: flex; flex-direction: column; gap: 14px; }
+.footer-nav-label {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 4px;
+}
+.footer-link {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink2); text-decoration: none; transition: color .3s;
+}
+.footer-link:hover { color: var(--ink); }
+.footer-contact { display: flex; flex-direction: column; gap: 14px; }
+.footer-contact-label {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 4px;
+}
+.footer-contact-email {
+  font-size: 7px; letter-spacing: 2px; color: var(--ink2);
+}
+.footer-copy {
+  width: 100%;
+  font-size: 7px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink3); padding-top: 24px;
+  border-top: 1px solid var(--ink3);
+}
+
+@media (max-width: 600px) {
+  main { padding: 100px 24px 60px; }
+  footer { padding: 32px 24px; }
+}
+
+@keyframes fu {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="grain"></div>
+
+<nav>
+  <a href="/" class="nav-logo">MOODA</a>
+  <div class="nav-links">
+    <a href="/" class="ntag">Home</a>
+    <a href="/about" class="ntag">About</a>
+    <a href="/journal" class="ntag active">Journal</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-label">Lighting Journal</div>
+  <h1 class="page-title">Light studies<br>from the field</h1>
+  <div id="grid-container">
+    <div class="state-msg">Loading articles…</div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-nav">
+    <div class="footer-nav-label">Pages</div>
+    <a href="/" class="footer-link">Home</a>
+    <a href="/about" class="footer-link">About</a>
+    <a href="/journal" class="footer-link">Journal</a>
+  </div>
+  <div class="footer-contact">
+    <div class="footer-contact-label">Contact us</div>
+    <span class="footer-contact-email">info@mooda-lab.com</span>
+  </div>
+  <div class="footer-copy">© 2026 Mooda Labs — All Rights Reserved</div>
+  <a href="/login" style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);text-decoration:none;opacity:0.4;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">Author login</a>
+</footer>
+
+<script id="repo-config" data-repo="mesmesdesign/mooda-site"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+if (cur && window.matchMedia('(hover: hover)').matches) {
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+}
+
+async function loadPosts() {
+  const container = document.getElementById('grid-container');
+  try {
+    const repo = document.getElementById('repo-config').dataset.repo;
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/posts`);
+    if (!res.ok) throw new Error('No posts folder found');
+    const files = await res.json();
+    const mdFiles = files.filter(f => f.name.endsWith('.md'));
+    if (mdFiles.length === 0) throw new Error('No articles yet');
+
+    const posts = await Promise.all(mdFiles.map(async (file) => {
+      const r = await fetch(file.download_url);
+      const text = await r.text();
+      return parsePost(text, file.name);
+    }));
+
+    posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    posts.forEach((post, i) => grid.appendChild(createCard(post, i)));
+    container.innerHTML = '';
+    container.appendChild(grid);
+
+    if (window.matchMedia('(hover: hover)').matches) {
+      grid.querySelectorAll('.card').forEach(el => {
+        el.addEventListener('mouseenter', () => cur.classList.add('big'));
+        el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    showPlaceholder(container);
+  }
+}
+
+function showPlaceholder(container) {
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  const card = createCard({
+    title: 'On the Quality of Light in Tropical Cities',
+    author: 'Placeholder Author',
+    date: '2024-03-15',
+    country: 'Singapore',
+    cover: null,
+    slug: 'on-the-quality-of-light-in-tropical-cities'
+  }, 0);
+  grid.appendChild(card);
+  container.innerHTML = '';
+  container.appendChild(grid);
+  if (window.matchMedia('(hover: hover)').matches) {
+    grid.querySelectorAll('.card').forEach(el => {
+      el.addEventListener('mouseenter', () => cur.classList.add('big'));
+      el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+    });
+  }
+}
+
+function parsePost(text, filename) {
+  const fmMatch = text.match(/^---\n([\s\S]*?)\n---/);
+  let meta = {};
+  if (fmMatch) { try { meta = jsyaml.load(fmMatch[1]); } catch {} }
+  const slug = filename.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', '');
+  return {
+    title:   meta.title   || 'Untitled',
+    author:  meta.author  || 'MOODA',
+    date:    meta.date    || '',
+    country: meta.country || '',
+    cover:   meta.cover   || null,
+    slug
+  };
+}
+
+function createCard(post, index) {
+  const card = document.createElement('a');
+  card.className = 'card';
+  card.href = `/posts/${post.slug}`;
+  card.style.animationDelay = `${0.3 + index * 0.08}s`;
+  const dateStr = post.date ? new Date(post.date).toLocaleDateString('en-GB', { year:'numeric', month:'short', day:'numeric' }) : '';
+  card.innerHTML = `
+    <div class="card-img">
+      ${post.cover
+        ? `<img src="${post.cover}" alt="${post.title}" loading="lazy">`
+        : `<div class="card-img-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+           </div>`}
+    </div>
+    <div class="card-meta">
+      <span class="card-date">${dateStr}</span>
+      <span class="card-country">${post.country}</span>
+    </div>
+    <div class="card-title">${post.title}</div>
+    <div class="card-author">${post.author}</div>
+  `;
+  return card;
+}
+
+loadPosts();
+</script>
+</body>
+</html>
