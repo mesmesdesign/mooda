@@ -3,6 +3,7 @@ title: Dramaturgy od space
 author: DJW
 date: 2026-04-27T15:48:00.000+08:00
 country: Krakow
+cover: /images/uploads/vecteezy_a-city-at-night-with-a-light-shining-on-the-road-ai-generated_34317261.jpg
 ---
 **Dramaturgy od space**
 
