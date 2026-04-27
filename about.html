@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>MOODA — About</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;800&family=Libre+Baskerville:ital,wght@1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<style>
+:root {
+  --paper: #f4f0e8;
+  --ink:   #14120e;
+  --ink2:  rgba(20,18,14,.38);
+  --ink3:  rgba(20,18,14,.13);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light only; background: var(--paper) !important; }
+body {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  -webkit-text-size-adjust: 100%;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── CURSOR ── */
+@media (hover: hover) {
+  body { cursor: none; }
+  #cur {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s;
+  }
+  #cur.big { width: 22px; height: 22px; background: rgba(20,18,14,.05); border: 1px solid rgba(20,18,14,.15); }
+}
+@media (hover: none) { #cur { display: none; } }
+
+/* ── GRAIN ── */
+#grain {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .022;
+}
+
+/* ── TOP NAV BAR — sticky, background filled ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink3);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 48px;
+}
+.nav-logo {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 14px; letter-spacing: -0.5px;
+  color: var(--ink); text-decoration: none;
+  transition: opacity .3s;
+}
+.nav-logo:hover { opacity: .5; }
+.nav-links { display: flex; gap: 32px; }
+.ntag {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink2); text-decoration: none;
+  transition: color .3s;
+}
+.ntag:hover { color: var(--ink); }
+.ntag.active { color: var(--ink); }
+@media (max-width: 600px) {
+  nav { padding: 18px 24px; }
+  .ntag { font-size: 6px; letter-spacing: 3px; }
+  .nav-links { gap: 20px; }
+}
+
+/* ── MAIN CONTENT ── */
+main {
+  flex: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 120px 48px 80px;
+  opacity: 0; animation: fu .9s ease forwards .2s;
+}
+
+/* ── PAGE LABEL ── */
+.page-label {
+  font-size: 7px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 64px;
+  display: flex; align-items: center; gap: 16px;
+}
+.page-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--ink3);
+}
+
+/* ── INTRO ── */
+.intro-line {
+  font-family: 'Outfit', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 48px);
+  line-height: 1; letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 64px;
+}
+
+/* ── BODY TEXT ── */
+.body-text {
+  font-size: 11px; letter-spacing: 1px; line-height: 2.4;
+  color: var(--ink2); margin-bottom: 48px;
+}
+.body-text p + p { margin-top: 24px; }
+
+/* ── DIVIDER ── */
+.divider {
+  border: none; border-top: 1px solid var(--ink3);
+  margin: 56px 0;
+}
+
+/* ── LOCATIONS ── */
+.locations-label {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 32px;
+}
+.locations {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+.location { opacity: 0; animation: fu .7s ease forwards; }
+.location:nth-child(1) { animation-delay: .5s; }
+.location:nth-child(2) { animation-delay: .65s; }
+.location:nth-child(3) { animation-delay: .8s; }
+.loc-city {
+  font-family: 'Outfit', sans-serif; font-weight: 800;
+  font-size: clamp(16px, 3vw, 22px); letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.loc-country {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink3);
+}
+.loc-desc {
+  font-size: 10px; letter-spacing: 1px; line-height: 2;
+  color: var(--ink2); margin-top: 12px;
+}
+
+/* ── PEOPLE ── */
+.people-label {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 32px;
+}
+.people { display: flex; flex-direction: column; }
+.person {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 16px 0; border-bottom: 1px solid var(--ink3);
+  opacity: 0; animation: fu .6s ease forwards;
+}
+.person:nth-child(1) { animation-delay: .6s; }
+.person:nth-child(2) { animation-delay: .7s; }
+.person:nth-child(3) { animation-delay: .8s; }
+.person:nth-child(4) { animation-delay: .9s; }
+.person:nth-child(5) { animation-delay: 1s; }
+.person-name { font-family: 'Libre Baskerville', serif; font-style: italic; font-size: 15px; }
+.person-meta {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink3); text-align: right;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--ink3);
+  padding: 40px 48px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 32px;
+  opacity: 0; animation: fu .7s ease forwards .8s;
+}
+.footer-nav { display: flex; flex-direction: column; gap: 14px; }
+.footer-nav-label {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 4px;
+}
+.footer-link {
+  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--ink2); text-decoration: none; transition: color .3s;
+}
+.footer-link:hover { color: var(--ink); }
+.footer-contact { display: flex; flex-direction: column; gap: 14px; }
+.footer-contact-label {
+  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 4px;
+}
+.footer-contact-email {
+  font-size: 7px; letter-spacing: 2px;
+  color: var(--ink2);
+}
+.footer-copy {
+  width: 100%;
+  font-size: 7px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink3);
+  padding-top: 24px;
+  border-top: 1px solid var(--ink3);
+}
+
+@media (max-width: 600px) {
+  main { padding: 100px 24px 60px; }
+  .locations { grid-template-columns: 1fr; gap: 24px; }
+  .person { flex-direction: column; gap: 6px; }
+  .person-meta { text-align: left; }
+  footer { padding: 32px 24px; }
+}
+
+@keyframes fu {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="grain"></div>
+
+<nav>
+  <a href="/" class="nav-logo">MOODA</a>
+  <div class="nav-links">
+    <a href="/" class="ntag">Home</a>
+    <a href="/about" class="ntag active">About</a>
+    <a href="/journal" class="ntag">Journal</a>
+  </div>
+</nav>
+
+<main>
+  <div class="page-label">About us</div>
+
+  <h1 class="intro-line">
+    We experience light,<br>we study light,<br>and play with light.
+  </h1>
+
+  <div class="body-text">
+    <p>MOODA is a lighting research collective operating across three continents. We bring together architects, researchers, and lighting designers who share a singular obsession — the way light shapes human experience, space, and emotion.</p>
+    <p>Our practice sits at the intersection of technical precision and poetic curiosity. We don't just design lighting systems; we investigate the phenomenology of light, document our findings, and share them openly through our journal.</p>
+    <p>Each studio brings its own cultural lens. Together, we form a living research network — exchanging ideas across time zones, publishing collaboratively, and occasionally making each other's cities a little brighter.</p>
+  </div>
+
+  <hr class="divider">
+
+  <div class="locations-label">Our studios</div>
+  <div class="locations">
+    <div class="location">
+      <div class="loc-city">Singapore</div>
+      <div class="loc-country">Southeast Asia</div>
+      <div class="loc-desc">Tropical light studies, urban luminosity, and architectural integration across the city-state.</div>
+    </div>
+    <div class="location">
+      <div class="loc-city">Wismar</div>
+      <div class="loc-country">Germany</div>
+      <div class="loc-desc">Northern European light research, historic preservation, and low-angle solar studies.</div>
+    </div>
+    <div class="location">
+      <div class="loc-city">Kraków</div>
+      <div class="loc-country">Poland</div>
+      <div class="loc-desc">Cultural lighting, museum installations, and research into light and collective memory.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="people-label">The collective</div>
+  <div class="people">
+    <div class="person">
+      <span class="person-name">Placeholder Name</span>
+      <span class="person-meta">Founding Director · Singapore</span>
+    </div>
+    <div class="person">
+      <span class="person-name">Placeholder Name</span>
+      <span class="person-meta">Research Lead · Wismar</span>
+    </div>
+    <div class="person">
+      <span class="person-name">Placeholder Name</span>
+      <span class="person-meta">Lighting Architect · Kraków</span>
+    </div>
+    <div class="person">
+      <span class="person-name">Placeholder Name</span>
+      <span class="person-meta">Lighting Architect · Singapore</span>
+    </div>
+    <div class="person">
+      <span class="person-name">Placeholder Name</span>
+      <span class="person-meta">Research Associate · Wismar</span>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-nav">
+    <div class="footer-nav-label">Pages</div>
+    <a href="/" class="footer-link">Home</a>
+    <a href="/about" class="footer-link">About</a>
+    <a href="/journal" class="footer-link">Journal</a>
+  </div>
+  <div class="footer-contact">
+    <div class="footer-contact-label">Contact us</div>
+    <span class="footer-contact-email">info@mooda-lab.com</span>
+  </div>
+  <div class="footer-copy">© 2026 Mooda Labs — All Rights Reserved</div>
+  <a href="/login" style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);text-decoration:none;opacity:0.4;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">Author login</a>
+</footer>
+
+<script>
+const cur = document.getElementById('cur');
+if (cur && window.matchMedia('(hover: hover)').matches) {
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+}
+</script>
+</body>
+</html>
