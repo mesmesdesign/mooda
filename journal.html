@@ -244,7 +244,7 @@ footer {
   <a href="/login" style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);text-decoration:none;opacity:0.4;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">Author login</a>
 </footer>
 
-<script id="repo-config" data-repo="mesmesdesign/mooda-site"></script>
+<script id="repo-config" data-repo="mesmesdesign/mooda"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 <script>
 /* ── CURSOR ── */
@@ -264,14 +264,21 @@ async function loadPosts() {
 
     // Use GitHub API with a timestamp to bust cache
     const ts = Date.now();
-    const res = await fetch(
+    // Try main branch first, fall back to master
+    let res = await fetch(
       `https://api.github.com/repos/${owner}/${repoName}/git/trees/main?recursive=1&_=${ts}`,
       { headers: { 'Accept': 'application/vnd.github.v3+json' } }
     );
-
+    if (!res.ok) {
+      res = await fetch(
+        `https://api.github.com/repos/${owner}/${repoName}/git/trees/master?recursive=1&_=${ts}`,
+        { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+      );
+    }
     if (!res.ok) throw new Error(`GitHub tree API error ${res.status}`);
 
     const data = await res.json();
+    const branch = data.url.includes('/main') ? 'main' : 'master';
 
     // Find all .md files inside posts/ folder
     const mdFiles = data.tree.filter(f =>
@@ -287,7 +294,7 @@ async function loadPosts() {
 
     // Fetch each file using raw.githubusercontent.com — no rate limit issues
     const posts = await Promise.all(mdFiles.map(async (file) => {
-      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repoName}/main/${file.path}?_=${ts}`;
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repoName}/${branch}/${file.path}?_=${ts}`;
       const r = await fetch(rawUrl);
       const text = await r.text();
       const filename = file.path.replace('posts/', '');
