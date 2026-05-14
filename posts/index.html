@@ -98,3 +98,136 @@ footer {
 }
 .footer-contact-email {
   font-size: 12px; letter-spacing: 2px; color: var(--mono-ink);
+    main { padding: 94px 24px 100px; }
+  .article-title { font-size: clamp(38px, 13vw, 56px); }
+  .article-body { font-size: 16px; line-height: 1.85; }
+  .cover-img { aspect-ratio: 4/3; margin: 44px 0 56px; }
+  .author-footer { flex-direction: column; gap: 8px; }
+}
+
+@keyframes fu {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="grain"></div>
+
+<nav>
+  <a href="/" class="nav-logo">MOODA</a>
+  <div class="nav-links">
+    <a href="/" class="ntag">Home</a>
+    <a href="/about" class="ntag">About</a>
+    <a href="/journal" class="ntag">Journal</a>
+  </div>
+</nav>
+
+<main id="main">
+  <div class="state-msg">Loading…</div>
+</main>
+
+<script id="repo-config" data-repo="mesmesdesign/mooda"></script>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cur');
+if (cur && window.matchMedia('(hover: hover)').matches) {
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px';
+    cur.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+}
+
+/* ── GET SLUG FROM URL ── */
+// URL pattern: /posts/my-article-slug
+const slug = window.location.pathname.replace('/posts/', '').replace(/\/$/, '');
+
+async function loadArticle() {
+  const main = document.getElementById('main');
+  const repo = document.getElementById('repo-config').dataset.repo;
+
+  try {
+    // Try fetching the file from GitHub
+    // Filename format: YYYY-MM-DD-slug.md — we search for matching slug
+    const listRes = await fetch(`https://api.github.com/repos/${repo}/contents/posts`);
+    if (!listRes.ok) throw new Error('Could not load posts');
+
+    const files = await listRes.json();
+    const match = files.find(f => f.name.endsWith(`-${slug}.md`) || f.name === `${slug}.md`);
+    if (!match) throw new Error('Article not found');
+
+    const res = await fetch(match.download_url);
+    const text = await res.text();
+    renderArticle(text);
+
+  } catch (e) {
+    main.innerHTML = `
+      <a href="/journal" class="back">Back to journal</a>
+      <div class="state-msg">Article not found.</div>
+    `;
+  }
+}
+
+function renderArticle(text) {
+  const main = document.getElementById('main');
+
+  // Parse frontmatter
+  const fmMatch = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  let meta = {}, body = text;
+  if (fmMatch) {
+    try { meta = jsyaml.load(fmMatch[1]); } catch {}
+    body = fmMatch[2];
+  }
+
+  const dateStr = meta.date
+    ? new Date(meta.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '';
+
+  const html = marked.parse(body);
+
+  main.innerHTML = `
+    <div class="article-header">
+      <a href="/journal" class="back">Back to journal</a>
+
+      <h1 class="article-title">${meta.title || 'Untitled'}</h1>
+
+      <div class="article-meta">
+        ${dateStr ? `<span class="meta-item">${dateStr}</span>` : ''}
+        ${meta.country ? `<span class="meta-item">${meta.country}</span>` : ''}
+        ${meta.author ? `<span class="meta-item">${meta.author}</span>` : ''}
+      </div>
+    </div>
+
+    ${meta.cover ? `<img class="cover-img" src="${meta.cover}" alt="${meta.title}">` : '<hr class="divider">'}
+
+    <div class="article-body">${html}</div>
+
+    <div class="author-footer">
+      <span class="author-name">${meta.author || 'MOODA'}</span>
+      <span class="author-meta">${meta.country || ''}</span>
+    </div>
+  `;
+
+  // Update page title
+  document.title = `MOODA — ${meta.title || 'Article'}`;
+
+  // Add cursor hover to new links
+  if (window.matchMedia('(hover: hover)').matches) {
+    main.querySelectorAll('a').forEach(el => {
+      el.addEventListener('mouseenter', () => cur.classList.add('big'));
+      el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+    });
+  }
+}
+
+loadArticle();
+</script>
+</body>
+</html>
