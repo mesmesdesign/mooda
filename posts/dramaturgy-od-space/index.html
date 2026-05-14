@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>MOODA — Article</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;800&family=Libre+Baskerville:ital,wght@0,400;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<!-- Lightweight markdown parser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+:root {
+  --paper: #f4f0e8;
+  --ink:   #14120e;
+  --mono-ink: #14120EFC;
+  --ink2:  rgba(20,18,14,.38);
+  --ink3:  rgba(20,18,14,.13);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light only; background: var(--paper) !important; }
+body {
+  background: var(--paper) !important;
+  color: var(--ink) !important;
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 12px;
+  -webkit-text-size-adjust: 100%;
+  min-height: 100vh;
+}
+
+/* ── CURSOR ── */
+@media (hover: hover) {
+  body { cursor: none; }
+  #cur {
+    position: fixed; z-index: 9999; pointer-events: none;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s;
+  }
+  #cur.big { width: 22px; height: 22px; background: rgba(20,18,14,.05); border: 1px solid rgba(20,18,14,.15); }
+}
+@media (hover: none) { #cur { display: none; } }
+
+/* ── GRAIN ── */
+#grain {
+  position: fixed; inset: 0; z-index: 997; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .022;
+}
+
+/* horizon lines replaced by nav + footer */
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--paper);
+  border-bottom: 1px solid var(--ink3);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 22px 48px;
+}
+.nav-logo {
+  font-family: 'Outfit', sans-serif; font-weight: 800;
+  font-size: 14px; letter-spacing: -0.5px;
+  color: var(--ink); text-decoration: none; transition: opacity .3s;
+}
+.nav-logo:hover { opacity: .5; }
+.nav-links { display: flex; gap: 32px; }
+.ntag {
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--mono-ink); text-decoration: none; transition: color .3s;
+}
+.ntag:hover { color: var(--ink); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--ink3);
+  padding: 40px 48px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 32px;
+  margin-top: 80px;
+}
+.footer-nav { display: flex; flex-direction: column; gap: 14px; }
+.footer-nav-label {
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--mono-ink); margin-bottom: 4px;
+}
+.footer-link {
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mono-ink); text-decoration: none; transition: color .3s;
+}
+.footer-link:hover { color: var(--ink); }
+.footer-contact { display: flex; flex-direction: column; gap: 14px; }
+.footer-contact-label {
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--mono-ink); margin-bottom: 4px;
+}
+.footer-contact-email {
+  font-size: 12px; letter-spacing: 2px; color: var(--mono-ink);
