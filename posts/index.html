@@ -98,7 +98,157 @@ footer {
 }
 .footer-contact-email {
   font-size: 12px; letter-spacing: 2px; color: var(--mono-ink);
-    main { padding: 94px 24px 100px; }
+  }
+.footer-copy {
+  width: 100%;
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mono-ink); padding-top: 24px;
+  border-top: 1px solid var(--ink3);
+}
+@media (max-width: 600px) {
+  nav { padding: 18px 24px; }
+  .nav-links { gap: 20px; }
+  footer { padding: 32px 24px; }
+}
+
+/* ── MAIN ── */
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 104px 48px 140px;
+  opacity: 0; animation: fu .9s ease forwards .2s;
+}
+
+.article-header,
+.article-body,
+.author-footer {
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── BACK LINK ── */
+.back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mono-ink); text-decoration: none;
+  margin-bottom: 26px; transition: opacity .3s;
+}
+.back:hover { opacity: .55; }
+
+/* ── ARTICLE META ── */
+.article-meta {
+  display: flex; gap: 18px 28px; margin-bottom: 0;
+  flex-wrap: wrap;
+}
+.meta-item {
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mono-ink);
+}
+
+/* ── ARTICLE TITLE ── */
+.article-title {
+  font-family: 'Outfit', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  font-weight: 800;
+  font-size: clamp(42px, 8vw, 78px);
+  line-height: .9; letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+
+/* ── COVER IMAGE ── */
+.cover-img {
+  display: block;
+  width: 100%; aspect-ratio: 16/8.5;
+  object-fit: cover;
+  margin: 56px 0 72px;
+  filter: grayscale(15%);
+}
+
+/* ── DIVIDER ── */
+.divider {
+  border: none; border-top: 1px solid var(--ink3);
+  margin-bottom: 56px;
+}
+
+/* ── ARTICLE BODY ── */
+.article-body {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.article-body h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  margin: 56px 0 20px;
+  color: var(--ink);
+}
+
+.article-body h3 {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mono-ink);
+  margin: 40px 0 16px;
+}
+
+.article-body p {
+  margin-bottom: 28px;
+}
+
+.article-body p:last-child { margin-bottom: 0; }
+
+.article-body em {
+  font-style: italic;
+}
+
+.article-body strong {
+  font-weight: 700;
+}
+
+.article-body hr {
+  border: none; border-top: 1px solid var(--ink3);
+  margin: 48px 0;
+}
+
+.article-body blockquote {
+  border-left: 1px solid var(--ink3);
+  padding-left: 24px;
+  margin: 32px 0;
+  font-style: italic;
+  color: var(--ink2);
+}
+
+/* ── AUTHOR FOOTER ── */
+.author-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--ink3);
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.author-name {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic; font-size: 15px;
+}
+.author-meta {
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mono-ink);
+}
+
+/* ── LOADING ── */
+.state-msg {
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mono-ink); padding: 80px 0;
+}
+
+@media (max-width: 600px) {
+  main { padding: 94px 24px 100px; }
   .article-title { font-size: clamp(38px, 13vw, 56px); }
   .article-body { font-size: 16px; line-height: 1.85; }
   .cover-img { aspect-ratio: 4/3; margin: 44px 0 56px; }
