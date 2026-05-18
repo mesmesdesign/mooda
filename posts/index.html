@@ -62,13 +62,13 @@ nav {
 }
 .nav-logo {
   font-family: 'Outfit', sans-serif; font-weight: 800;
-  font-size: 14px; letter-spacing: -0.5px;
+  font-size: 21px; letter-spacing: -0.5px;
   color: var(--ink); text-decoration: none; transition: opacity .3s;
 }
 .nav-logo:hover { opacity: .5; }
 .nav-links { display: flex; gap: 32px; }
 .ntag {
-  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  font-size: 18px; letter-spacing: 4px; text-transform: uppercase;
   color: var(--mono-ink); text-decoration: none; transition: color .3s;
 }
 .ntag:hover { color: var(--ink); }
@@ -142,7 +142,7 @@ main {
   flex-wrap: wrap;
 }
 .meta-item {
-  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  font-size: 16px; letter-spacing: 3px; text-transform: uppercase;
   color: var(--mono-ink);
 }
 
@@ -350,7 +350,6 @@ function renderArticle(text) {
 
       <div class="article-meta">
         ${dateStr ? `<span class="meta-item">${dateStr}</span>` : ''}
-        ${meta.country ? `<span class="meta-item">${meta.country}</span>` : ''}
         ${meta.author ? `<span class="meta-item">${meta.author}</span>` : ''}
       </div>
     </div>
@@ -361,7 +360,6 @@ function renderArticle(text) {
 
     <div class="author-footer">
       <span class="author-name">${meta.author || 'MOODA'}</span>
-      <span class="author-meta">${meta.country || ''}</span>
     </div>
   `;
 
