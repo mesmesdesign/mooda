@@ -12,6 +12,7 @@
 :root {
   --paper: #f4f0e8;
   --ink:   #14120e;
+  --mono-ink: #14120EFC;
   --ink2:  rgba(20,18,14,.38);
   --ink3:  rgba(20,18,14,.13);
 }
@@ -21,6 +22,7 @@ body {
   background: var(--paper) !important;
   color: var(--ink) !important;
   font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 12px;
   -webkit-text-size-adjust: 100%;
   min-height: 100vh;
   display: flex; flex-direction: column;
@@ -57,21 +59,22 @@ nav {
 }
 .nav-logo {
   font-family: 'Outfit', sans-serif; font-weight: 800;
-  font-size: 14px; letter-spacing: -0.5px;
+  font-size: 21px; letter-spacing: -0.5px;
   color: var(--ink); text-decoration: none;
   transition: opacity .3s;
 }
 .nav-logo:hover { opacity: .5; }
 .nav-links { display: flex; gap: 32px; }
 .ntag {
-  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
-  color: var(--ink2); text-decoration: none; transition: color .3s;
+  font-size: 18px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--mono-ink); text-decoration: none; transition: color .3s;
 }
 .ntag:hover { color: var(--ink); }
 .ntag.active { color: var(--ink); }
 @media (max-width: 600px) {
   nav { padding: 18px 24px; }
-  .ntag { font-size: 6px; letter-spacing: 3px; }
+  .nav-logo { font-size: 18px; }
+  .ntag { font-size: 13px; letter-spacing: 3px; }
   .nav-links { gap: 20px; }
 }
 
@@ -86,8 +89,8 @@ main {
 
 /* ── PAGE LABEL ── */
 .page-label {
-  font-size: 7px; letter-spacing: 5px; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 16px;
+  font-size: 12px; letter-spacing: 5px; text-transform: uppercase;
+  color: var(--mono-ink); margin-bottom: 18px;
   display: flex; align-items: center; gap: 16px;
   opacity: 0; animation: fu .7s ease forwards .1s;
 }
@@ -96,16 +99,16 @@ main {
 .page-title {
   font-family: 'Outfit', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
   font-weight: 800;
-  font-size: clamp(32px, 6vw, 56px);
+  font-size: clamp(42px, 8vw, 78px);
   letter-spacing: -2px; line-height: 1;
-  margin-bottom: 80px;
+  margin-bottom: 72px;
   opacity: 0; animation: fu .8s ease forwards .2s;
 }
 
 /* ── LOADING / EMPTY STATE ── */
 .state-msg {
-  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--ink3); padding: 80px 0; text-align: center;
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mono-ink); padding: 80px 0; text-align: center;
 }
 
 /* ── GRID ── */
@@ -143,23 +146,23 @@ main {
 }
 .card-img-placeholder svg { opacity: .3; }
 .card-meta {
-  display: flex; justify-content: space-between; align-items: baseline;
-  margin-bottom: 10px;
+  display: flex; align-items: baseline;
+  margin-bottom: 12px;
 }
 .card-date, .card-country {
-  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--ink3);
+  font-size: 16px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mono-ink);
 }
 .card-title {
   font-family: 'Libre Baskerville', serif; font-style: italic;
-  font-size: clamp(15px, 2vw, 19px);
+  font-size: clamp(18px, 2vw, 22px);
   line-height: 1.35; margin-bottom: 10px;
   transition: opacity .3s;
 }
 .card:hover .card-title { opacity: .6; }
 .card-author {
-  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--ink2); margin-top: auto; padding-top: 12px;
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mono-ink); margin-top: auto; padding-top: 12px;
   border-top: 1px solid var(--ink3);
 }
 
@@ -173,26 +176,28 @@ footer {
 }
 .footer-nav { display: flex; flex-direction: column; gap: 14px; }
 .footer-nav-label {
-  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 4px;
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--mono-ink); margin-bottom: 4px;
 }
 .footer-link {
-  font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--ink2); text-decoration: none; transition: color .3s;
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--mono-ink); text-decoration: none; transition: color .3s;
 }
 .footer-link:hover { color: var(--ink); }
 .footer-contact { display: flex; flex-direction: column; gap: 14px; }
 .footer-contact-label {
-  font-size: 7px; letter-spacing: 4px; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 4px;
+  font-size: 12px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--mono-ink); margin-bottom: 4px;
 }
 .footer-contact-email {
-  font-size: 7px; letter-spacing: 2px; color: var(--ink2);
+  font-size: 12px; letter-spacing: 2px; color: var(--mono-ink);
+  text-decoration: none; transition: opacity .3s;
 }
+.footer-contact-email:hover { opacity: .55; }
 .footer-copy {
   width: 100%;
-  font-size: 7px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--ink3); padding-top: 24px;
+  font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--mono-ink); padding-top: 24px;
   border-top: 1px solid var(--ink3);
 }
 
@@ -238,10 +243,10 @@ footer {
   </div>
   <div class="footer-contact">
     <div class="footer-contact-label">Contact us</div>
-    <span class="footer-contact-email">info@mooda-lab.com</span>
+    <a class="footer-contact-email" href="mailto:info@mooda-lab.com">info@mooda-lab.com</a>
   </div>
   <div class="footer-copy">© 2026 Mooda Labs — All Rights Reserved</div>
-  <a href="/login" style="font-size:7px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);text-decoration:none;opacity:0.4;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">Author login</a>
+  <a href="/login" style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--mono-ink);text-decoration:none;opacity:0.4;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.4'">Author login</a>
 </footer>
 
 <script id="repo-config" data-repo="mesmesdesign/mooda"></script>
@@ -388,7 +393,6 @@ function createCard(post, index) {
     </div>
     <div class="card-meta">
       <span class="card-date">${dateStr}</span>
-      <span class="card-country">${post.country}</span>
     </div>
     <div class="card-title">${post.title}</div>
     <div class="card-author">${post.author}</div>
